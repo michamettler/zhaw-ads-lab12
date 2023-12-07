@@ -8,7 +8,7 @@ public class ParallelQuickerSortServer extends Thread implements CommandExecutor
     int left, right;
     static int dataElems = 100000;
     static int insertion_threshold = 100;
-    private final int SPLIT_THRESHOLD = 5000;
+    private final int SPLIT_THRESHOLD = 50000;
     private final int DATARANGE = 10000000;
 
     public ParallelQuickerSortServer() {}
@@ -25,16 +25,63 @@ public class ParallelQuickerSortServer extends Thread implements CommandExecutor
         Thread t2 = null;
 
         if (left < right) {
-            // TODO Aufgabe 12.3
+            mid = partition(arr, left, right);
+            if (mid - left > SPLIT_THRESHOLD) {
+                t1 = new ParallelQuickerSortServer(arr, left, mid - 1);
+                t1.start();
+            } else {
+                quickerSort(arr, left, mid - 1);
+            }
+            if (right - mid > SPLIT_THRESHOLD) {
+                t2 = new ParallelQuickerSortServer(arr, mid + 1, right);
+                t2.start();
+            } else {
+                quickerSort(arr, mid + 1, right);
+            }
+            if (t1 != null) {
+                try {
+                    t1.join();
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            if (t2 != null) {
+                try {
+                    t2.join();
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
         }
     }
 
     private void quickerSort(int[] arr, int left, int right) {
-        // TODO Aus Aufgabe 12.1 übernehmen
+
+        if (arr.length > 50) {
+            if (left < right) {
+                moveMedianValueToTheRight(arr, left, right);
+                int indexPivot = partition(arr, left, right);
+                quickerSort(arr, left, indexPivot-1);
+                quickerSort(arr, indexPivot+1, right);
+            }
+
+        } else {
+            insertionSort(arr, left, right);
+        }
+
     }
 
     private int partition(int[] arr, int left, int right) {
-        // TODO Aus Aufgabe 12.1 übernehmen
+        int pivotValue = arr[right];
+        int i = left;
+        for (int j = left; j <= right - 1; j++) {
+            if (arr[j] < pivotValue) {
+                swap(arr, i, j);
+                i++;
+            }
+        }
+        swap(arr, i, right);
+        return i;
     }
 
     private void moveMedianValueToTheRight(int[] arr, int left, int right)

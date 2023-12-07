@@ -1,5 +1,4 @@
 package ch.zhaw.ads;
-
 import java.util.Arrays;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -70,20 +69,39 @@ public class SortServer implements CommandExecutor {
         System.arraycopy(b, 0, a, 0, a.length);
     }
 
-    void quickerSort(int[] a){
-        quickerSort(a, 0, a.length-1);
+    void quickerSort(int[] a) {
+        quickerSort(a, 0, a.length - 1);
     }
 
     private void quickerSort(int[] arr, int left, int right) {
         // To do Aufgabe 12.1
+        if (arr.length > 50) {
+            if (left < right) {
+                moveMedianValueToTheRight(arr, left, right);
+                int indexPivot = partition(arr, left, right);
+                quickerSort(arr, left, indexPivot-1);
+                quickerSort(arr, indexPivot+1, right);
+            }
+
+        } else {
+            insertionSort(arr, left, right);
+        }
     }
 
-    private int partition (int[] arr, int left, int right) {
-        // To do Aufgabe 12.1
+    private int partition(int[] arr, int left, int right) {
+        int pivotValue = arr[right];
+        int i = left;
+        for (int j = left; j <= right-1; j++) {
+            if (arr[j] < pivotValue) {
+                swap(arr, i, j);
+                i++;
+            }
+        }
+        swap(arr, i, right);
+        return i;
     }
 
-    private void moveMedianValueToTheRight(int[] arr, int left, int right)
-    {
+    private void moveMedianValueToTheRight(int[] arr, int left, int right) {
         if (right - left < 5) return;
         int mid = (right + left) / 2;
         if (arr[left] <= arr[mid] && arr[mid] <= arr[right] || arr[right] <= arr[mid] && arr[mid] <= arr[left]) {
@@ -156,12 +174,12 @@ public class SortServer implements CommandExecutor {
             count++;
             endTime = System.currentTimeMillis();
         }
-        elapsed = (double)(endTime - startTime) / count;
-        if (!isSorted(b)) throw new Exception ("ERROR not sorted");
+        elapsed = (double) (endTime - startTime) / count;
+        if (!isSorted(b)) throw new Exception("ERROR not sorted");
         return elapsed;
     }
 
-    public String execute(String arg)  {
+    public String execute(String arg) {
         Map<String, Consumer<int[]>> sorter = Map.of(
                 "BUBBLE", this::bubbleSort,
                 "INSERTION", this::insertionSort,
@@ -169,7 +187,7 @@ public class SortServer implements CommandExecutor {
                 "STREAM", this::streamSort,
                 "QUICKERSORT", this::quickerSort
         );
-        Map<String, Supplier<int[]>> generator =  Map.of(
+        Map<String, Supplier<int[]>> generator = Map.of(
                 "RANDOM", this::randomData,
                 "ASC", this::ascendingData,
                 "DESC", this::descendingData
@@ -189,16 +207,26 @@ public class SortServer implements CommandExecutor {
     public static void main(String[] args) {
         SortServer sorter = new SortServer();
         String sort;
-        sort = "BUBBLE RANDOM 10000"; System.out.println(sorter.execute(sort));
-        sort = "SELECTION RANDOM 10000"; System.out.println(sorter.execute(sort));
-        sort = "INSERTION RANDOM 10000"; System.out.println(sorter.execute(sort));
-        sort = "QUICKERSORT RANDOM 10000 100"; System.out.println(sorter.execute(sort));
-        sort = "STREAM RANDOM 10000"; System.out.println(sorter.execute(sort));
+        sort = "BUBBLE RANDOM 10000";
+        System.out.println(sorter.execute(sort));
+        sort = "SELECTION RANDOM 10000";
+        System.out.println(sorter.execute(sort));
+        sort = "INSERTION RANDOM 10000";
+        System.out.println(sorter.execute(sort));
+        sort = "QUICKERSORT RANDOM 10000 100";
+        System.out.println(sorter.execute(sort));
+        sort = "STREAM RANDOM 10000";
+        System.out.println(sorter.execute(sort));
 
-        sort = "BUBBLE ASC 10000"; System.out.println(sorter.execute(sort));
-        sort = "SELECTION ASC 10000"; System.out.println(sorter.execute(sort));
-        sort = "INSERTION ASC 10000"; System.out.println(sorter.execute(sort));
-        sort = "QUICKERSORT ASC 10000 100"; System.out.println(sorter.execute(sort));
-        sort = "STREAM ASC 10000"; System.out.println(sorter.execute(sort));
+        sort = "BUBBLE ASC 10000";
+        System.out.println(sorter.execute(sort));
+        sort = "SELECTION ASC 10000";
+        System.out.println(sorter.execute(sort));
+        sort = "INSERTION ASC 10000";
+        System.out.println(sorter.execute(sort));
+        sort = "QUICKERSORT ASC 10000 100";
+        System.out.println(sorter.execute(sort));
+        sort = "STREAM ASC 10000";
+        System.out.println(sorter.execute(sort));
     }
 }
